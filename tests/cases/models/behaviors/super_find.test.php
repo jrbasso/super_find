@@ -31,6 +31,29 @@ class SuperFindBehaviorTest extends CakeTestCase {
 
 	function startTest() {
 		$this->User =& ClassRegistry::init('User');
+		$this->Record =& ClassRegistry::init('Record');
+	}
+
+/**
+ * testAllFields
+ *
+ * This tests works in core, just checking if keeping working... :)
+ *
+ * @access public
+ * @return void
+ */
+	function testAllFields() {
+		$result = $this->Record->find('all', array('fields' => 'Record.*', 'recursive' => -1, 'limit' => 1));
+		$expected = array(array('Record' => array('id' => 1, 'title' => 'Record 1', 'task_id' => 1)));
+		$this->assertEqual($result, $expected);
+
+		$result = $this->Record->find('all', array('fields' => array('Record.*'), 'recursive' => -1, 'limit' => 1));
+		$expected = array(array('Record' => array('id' => 1, 'title' => 'Record 1', 'task_id' => 1)));
+		$this->assertEqual($result, $expected);
+
+		$result = $this->Record->find('all', array('fields' => array('Record.title', 'Task.*'), 'recursive' => 0, 'limit' => 1));
+		$expected = array(array('Record' => array('title' => 'Record 1'), 'Task' => array('id' => 1, 'name' => 'Task 1', 'user_id' => 1)));
+		$this->assertEqual($result, $expected);
 	}
 
 	function testHasMany() {
