@@ -17,10 +17,10 @@ class RecordFixture extends CakeTestFixture {
  * @access public
  */
 	var $records = array(
-		array('id' => 1, 'name' => 'Record 1', 'task_id' => 1),
-		array('id' => 2, 'name' => 'Record 2', 'task_id' => 2),
-		array('id' => 3, 'name' => 'Record 3', 'task_id' => 2),
-		array('id' => 4, 'name' => 'Record 4', 'task_id' => 3)
+		array('id' => 1, 'title' => 'Record 1', 'task_id' => 1),
+		array('id' => 2, 'title' => 'Record 2', 'task_id' => 2),
+		array('id' => 3, 'title' => 'Record 3', 'task_id' => 2),
+		array('id' => 4, 'title' => 'Record 4', 'task_id' => 3)
 	);
 }
 ?>
