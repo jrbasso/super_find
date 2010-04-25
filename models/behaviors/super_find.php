@@ -17,6 +17,7 @@ class SuperFindBehavior extends ModelBehavior {
 			if (!is_array($query['conditions'])) {
 				$query['conditions'] = (array)$query['conditions'];
 			}
+			$extraFinds = array();
 			foreach ($query['conditions'] as $key => $value) {
 				$check = $value;
 				if (is_string($key)) {
@@ -30,19 +31,23 @@ class SuperFindBehavior extends ModelBehavior {
 					continue;
 				}
 				if (isset($Model->hasMany[$modelName], $Model->$modelName)) {
-					$data = $Model->$modelName->find('all', array(
-						'fields' => array($Model->hasMany[$modelName]['foreignKey']),
-						'conditions' => array($key => $value),
-						'recursive' => -1
-					));
-					$ids = Set::extract('{n}.' . $modelName . '.' . $Model->hasMany[$modelName]['foreignKey'], $data);
+					$extraFinds[$modelName][$key] = $value;
 					unset($query['conditions'][$key]);
-					if (empty($ids)) {
-						$query['conditions'][] = '1 = 0';
-						continue;
-					}
-					$query['conditions'][$Model->primaryKey] = array_unique($ids);
 				}
+			}
+			foreach ($extraFinds as $modelName => $extraConditions) {
+				$fk = $Model->hasMany[$modelName]['foreignKey'];
+				$data = $Model->$modelName->find('all', array(
+					'fields' => array($fk),
+					'conditions' => $extraConditions,
+					'recursive' => -1
+				));
+				$ids = Set::extract('{n}.' . $modelName . '.' . $fk, $data);
+				if (empty($ids)) {
+					$query['conditions'][] = '1 = 0';
+					break;
+				}
+				$query['conditions'][$Model->primaryKey] = array_unique($ids);
 			}
 		}
 
