@@ -61,20 +61,28 @@ class SuperFindBehaviorTest extends CakeTestCase {
 	}
 
 	function testHasMany() {
-		$result = $this->User->superFind('all', array('conditions' => array('Task.name' => 'Task 1')));
-		$expected = array(array('User' => array('id' => 1, 'name' => 'User 1'), 'Task' => array(array('id' => 1, 'name' => 'Task 1', 'user_id' => 1))));
-		$this->assertIdentical($result, $expected);
+		$result = $this->User->superFind('all', array('conditions' => array('Task.name = "Task 1"'), 'recursive' => -1));
+		$expected = array(array('User' => array('id' => 1, 'name' => 'User 1')));
+		$this->assertEqual($result, $expected);
+
+		$result = $this->User->superFind('all', array('conditions' => array('Task.name' => 'Task 1'), 'recursive' => -1));
+		$this->assertEqual($result, $expected);
 
 		$result = $this->User->superFind('all', array('conditions' => array('Task.user_id' => 2)));
-		$expected = array(array('User' => array('id' => 2, 'name' => 'User 2'), 'Task' => array(array('id' => 2, 'name' => 'Task 2', 'user_id' => 2), array('id' => 3, 'name' => 'Task 3', 'user_id' => 2))));
-		$this->assertIdentical($result, $expected);
+		$expected = array(array(
+			'User' => array('id' => 2, 'name' => 'User 2'),
+			'Task' => array(
+				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2),
+				array('id' => 3, 'name' => 'Task 3', 'user_id' => 2)
+			),
+			'Team' => array(
+				array('id' => 1, 'name' => 'Team 1')
+			)
+		));
+		$this->assertEqual($result, $expected);
 
 		$result = $this->User->superFind('all', array('conditions' => array('Task.name' => 'Task 999')));
 		$expected = array();
-		$this->assertIdentical($result, $expected);
-
-		$result = $this->User->superFind('all', array('order' => array('Task.name' => 'DESC'), 'limit' => 1));
-		$expected = array(array('User' => array('id' => 3, 'name' => 'User 3'), 'Task' => array(array('id' => 4, 'name' => 'Task 4', 'user_id' => 3))));
 		$this->assertIdentical($result, $expected);
 	}
 
