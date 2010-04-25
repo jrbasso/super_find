@@ -44,7 +44,7 @@ class SuperFindBehavior extends ModelBehavior {
 				));
 				$ids = Set::extract('{n}.' . $modelName . '.' . $fk, $data);
 				if (empty($ids)) {
-					$query['conditions'][] = '1 = 0';
+					$query['conditions'] = '1 = 0';
 					break;
 				}
 				$query['conditions'][$Model->primaryKey] = array_unique($ids);
