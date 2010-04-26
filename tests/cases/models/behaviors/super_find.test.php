@@ -60,7 +60,7 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 	}
 
-	function testHasMany() {
+	function testConditionsInHasManyOfOneLevel() {
 		$result = $this->User->superFind('all', array('conditions' => array('Task.name = "Task 1"'), 'recursive' => -1));
 		$expected = array(array('User' => array('id' => 1, 'name' => 'User 1')));
 		$this->assertEqual($result, $expected);
