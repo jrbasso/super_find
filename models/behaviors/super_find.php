@@ -13,6 +13,11 @@ class SuperFindBehavior extends ModelBehavior {
 			list($type, $query) = array($conditions, $fields);
 		}
 
+		$relations = array('belongsTo', 'hasOne', 'hasMany', 'hasAndBelongsToMany');
+		$originalRelations = array();
+		foreach ($relations as $relation) {
+			$originalRelations[$relation] = $Model->$relation;
+		}
 		if (isset($query['conditions'])) {
 			if (!is_array($query['conditions'])) {
 				$query['conditions'] = (array)$query['conditions'];
@@ -37,21 +42,39 @@ class SuperFindBehavior extends ModelBehavior {
 			}
 			foreach ($extraFinds as $modelName => $extraConditions) {
 				$fk = $Model->hasMany[$modelName]['foreignKey'];
+				$pk = $modelName . '.' . $Model->$modelName->primaryKey;
 				$data = $Model->$modelName->find('all', array(
-					'fields' => array($fk),
+					'fields' => array($fk, $pk),
 					'conditions' => $extraConditions,
 					'recursive' => -1
 				));
-				$ids = Set::extract('{n}.' . $modelName . '.' . $fk, $data);
-				if (empty($ids)) {
+				$masterModelIds = array_unique(Set::extract('{n}.' . $modelName . '.' . $fk, $data));
+				if (empty($masterModelIds)) {
 					$query['conditions'] = '1 = 0';
 					break;
 				}
-				$query['conditions'][$Model->primaryKey] = array_unique($ids);
+				$query['conditions'][$Model->primaryKey] = $masterModelIds;
+				$otherModelIds = array_unique(Set::extract('{n}.' . $pk, $data));
+				if (!empty($Model->hasMany[$modelName]['conditions'])) {
+					$Model->hasMany[$modelName]['conditions'] = array($Model->hasMany[$modelName]['conditions']);
+				}
+				if (isset($Model->hasMany[$modelName]['conditions'][$pk])) {
+					if (!is_array($Model->hasMany[$modelName]['conditions'][$pk])) {
+						$Model->hasMany[$modelName]['conditions'][$pk] = array($Model->hasMany[$modelName]['conditions'][$pk]);
+					}
+				} else {
+					$Model->hasMany[$modelName]['conditions'][$pk] = array();
+				}
+				$Model->hasMany[$modelName]['conditions'][$pk] = array_merge($Model->hasMany[$modelName]['conditions'][$pk], $otherModelIds);
 			}
 		}
 
-		return $Model->find($type, $query);
+		$return = $Model->find($type, $query);
+		foreach ($relations as $relation) {
+			$Model->$relation = $originalRelations[$relation];
+		}
+
+		return $return;
 	}
 }
 

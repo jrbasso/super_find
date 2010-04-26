@@ -84,6 +84,18 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		$result = $this->User->superFind('all', array('conditions' => array('Task.user_id' => 2, 'User.name' => 'User 2')));
 		$this->assertEqual($result, $expected);
 
+		$result = $this->User->superFind('all', array('conditions' => array('Task.user_id' => 2, 'Task.name' => 'Task 2')));
+		$expected = array(array(
+			'User' => array('id' => 2, 'name' => 'User 2'),
+			'Task' => array(
+				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2)
+			),
+			'Team' => array(
+				array('id' => 1, 'name' => 'Team 1')
+			)
+		));
+		$this->assertEqual($result, $expected);
+
 		$result = $this->User->superFind('all', array('conditions' => array('Task.name' => 'Task 999')));
 		$expected = array();
 		$this->assertIdentical($result, $expected);
