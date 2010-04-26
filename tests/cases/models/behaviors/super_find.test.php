@@ -61,8 +61,11 @@ class SuperFindBehaviorTest extends CakeTestCase {
 	}
 
 	function testConditionsInHasManyOfOneLevel() {
-		$result = $this->User->superFind('all', array('conditions' => array('Task.name = "Task 1"'), 'recursive' => -1));
+		$result = $this->User->superFind('all', array('conditions' => 'Task.name = "Task 1"', 'recursive' => -1));
 		$expected = array(array('User' => array('id' => 1, 'name' => 'User 1')));
+		$this->assertEqual($result, $expected);
+
+		$result = $this->User->superFind('all', array('conditions' => array('Task.name = "Task 1"'), 'recursive' => -1));
 		$this->assertEqual($result, $expected);
 
 		$result = $this->User->superFind('all', array('conditions' => array('Task.name' => 'Task 1'), 'recursive' => -1));
@@ -95,6 +98,9 @@ class SuperFindBehaviorTest extends CakeTestCase {
 			)
 		));
 		$this->assertEqual($result, $expected);
+
+		$result = $this->User->superFind('first', array('conditions' => array('Task.user_id' => 2, 'Task.name' => 'Task 2')));
+		$this->assertEqual($result, $expected[0]);
 
 		$result = $this->User->superFind('all', array('conditions' => array('Task.name' => 'Task 999')));
 		$expected = array();
