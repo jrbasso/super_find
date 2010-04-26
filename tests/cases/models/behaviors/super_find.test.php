@@ -60,17 +60,27 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 	}
 
+/**
+ * testConditionsInHasManyOfOneLevel
+ *
+ * @access public
+ * @return void
+ */
 	function testConditionsInHasManyOfOneLevel() {
+		// Conditions as string
 		$result = $this->User->superFind('all', array('conditions' => 'Task.name = "Task 1"', 'recursive' => -1));
 		$expected = array(array('User' => array('id' => 1, 'name' => 'User 1')));
 		$this->assertEqual($result, $expected);
 
+		// Conditions with string value
 		$result = $this->User->superFind('all', array('conditions' => array('Task.name = "Task 1"'), 'recursive' => -1));
 		$this->assertEqual($result, $expected);
 
+		// Conditions with key/value
 		$result = $this->User->superFind('all', array('conditions' => array('Task.name' => 'Task 1'), 'recursive' => -1));
 		$this->assertEqual($result, $expected);
 
+		// Multiples records of relation
 		$result = $this->User->superFind('all', array('conditions' => array('Task.user_id' => 2)));
 		$expected = array(array(
 			'User' => array('id' => 2, 'name' => 'User 2'),
@@ -84,9 +94,11 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		));
 		$this->assertEqual($result, $expected);
 
+		// Conditions with relation model and self model
 		$result = $this->User->superFind('all', array('conditions' => array('Task.user_id' => 2, 'User.name' => 'User 2')));
 		$this->assertEqual($result, $expected);
 
+		// Conditions with two conditions of relation model
 		$result = $this->User->superFind('all', array('conditions' => array('Task.user_id' => 2, 'Task.name' => 'Task 2')));
 		$expected = array(array(
 			'User' => array('id' => 2, 'name' => 'User 2'),
@@ -99,16 +111,20 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		));
 		$this->assertEqual($result, $expected);
 
+		// Find first
 		$result = $this->User->superFind('first', array('conditions' => array('Task.user_id' => 2, 'Task.name' => 'Task 2')));
 		$this->assertEqual($result, $expected[0]);
 
+		// hasMany empty
 		$result = $this->User->superFind('all', array('conditions' => array('Task.name' => 'Task 999')));
 		$expected = array();
 		$this->assertIdentical($result, $expected);
 
+		// Conditions in hasMany model not exists
 		$result = $this->User->superFind('all', array('conditions' => array('Task.user_id' => 2, 'Task.name' => 'Task 1')));
 		$this->assertIdentical($result, $expected);
 
+		// hasMany model return value, but not have user with this values
 		$result = $this->User->superFind('all', array('conditions' => array('Task.user_id' => 2, 'User.name' => 'User 1')));
 		$this->assertIdentical($result, $expected);
 	}
