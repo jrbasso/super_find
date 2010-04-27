@@ -61,17 +61,7 @@ class SuperFindBehavior extends ModelBehavior {
 				}
 				$query['conditions'][$Model->primaryKey] = $masterModelIds;
 				$otherModelIds = array_unique(Set::extract('{n}.' . $pk, $data));
-				if (!empty($Model->hasMany[$modelName]['conditions'])) {
-					$Model->hasMany[$modelName]['conditions'] = array($Model->hasMany[$modelName]['conditions']);
-				}
-				if (isset($Model->hasMany[$modelName]['conditions'][$pk])) {
-					if (!is_array($Model->hasMany[$modelName]['conditions'][$pk])) {
-						$Model->hasMany[$modelName]['conditions'][$pk] = array($Model->hasMany[$modelName]['conditions'][$pk]);
-					}
-				} else {
-					$Model->hasMany[$modelName]['conditions'][$pk] = array();
-				}
-				$Model->hasMany[$modelName]['conditions'][$pk] = array_merge($Model->hasMany[$modelName]['conditions'][$pk], $otherModelIds);
+				$this->_addCondition($Model, 'hasMany', $modelName, $pk, $otherModelIds);
 			}
 			foreach ($extraFinds['HABTM'] as $modelName => $extraConditions) {
 				$pk = $modelName . '.' . $Model->$modelName->primaryKey;
@@ -103,17 +93,7 @@ class SuperFindBehavior extends ModelBehavior {
 				$masterModelIds = array_unique(Set::extract('{n}.Relation.' . $Model->hasAndBelongsToMany[$modelName]['foreignKey'], $data));
 
 				$query['conditions'][$Model->primaryKey] = $masterModelIds;
-				if (!empty($Model->hasAndBelongsToMany[$modelName]['conditions'])) {
-					$Model->hasAndBelongsToMany[$modelName]['conditions'] = array($Model->hasAndBelongsToMany[$modelName]['conditions']);
-				}
-				if (isset($Model->hasAndBelongsToMany[$modelName]['conditions'][$pk])) {
-					if (!is_array($Model->hasAndBelongsToMany[$modelName]['conditions'][$pk])) {
-						$Model->hasAndBelongsToMany[$modelName]['conditions'][$pk] = array($Model->hasAndBelongsToMany[$modelName]['conditions'][$pk]);
-					}
-				} else {
-					$Model->hasAndBelongsToMany[$modelName]['conditions'][$pk] = array();
-				}
-				$Model->hasAndBelongsToMany[$modelName]['conditions'][$pk] = array_merge($Model->hasAndBelongsToMany[$modelName]['conditions'][$pk], $otherModelIds);
+				$this->_addCondition($Model, 'hasAndBelongsToMany', $modelName, $pk, $otherModelIds);
 			}
 		}
 
@@ -123,6 +103,21 @@ class SuperFindBehavior extends ModelBehavior {
 		}
 
 		return $return;
+	}
+
+	function _addCondition(&$Model, $type, $otherModel, $field, $value) {
+		$relation =& $Model->$type;
+		if (!empty($relation[$otherModel]['conditions'])) {
+			$relation[$otherModel]['conditions'] = array($relation[$otherModel]['conditions']);
+		}
+		if (isset($relation[$otherModel]['conditions'][$field])) {
+			if (!is_array($relation[$otherModel]['conditions'][$field])) {
+				$relation[$otherModel]['conditions'][$field] = array($relation[$otherModel]['conditions'][$field]);
+			}
+		} else {
+			$relation[$otherModel]['conditions'][$field] = array();
+		}
+		$relation[$otherModel]['conditions'][$field] = array_merge($relation[$otherModel]['conditions'][$field], $value);
 	}
 }
 
