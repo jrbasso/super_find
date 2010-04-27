@@ -129,6 +129,90 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		$this->assertIdentical($result, $expected);
 	}
 
+/**
+ * testConditionsInHasManyOfOneLevel
+ *
+ * @access public
+ * @return void
+ */
+	function testConditionsInHABTMOfOneLevel() {
+		// HABTM with one condition
+		$result = $this->User->superFind('all', array('conditions' => array('Team.name' => 'Team 1')));
+		$expected = array(array(
+			'User' => array('id' => 2, 'name' => 'User 2'),
+			'Task' => array(
+				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2),
+				array('id' => 3, 'name' => 'Task 3', 'user_id' => 2)
+			),
+			'Team' => array(
+				array('id' => 1, 'name' => 'Team 1')
+			)
+		));
+		$this->assertEqual($result, $expected);
+
+		// Multiples records of Users
+		$result = $this->User->superFind('all', array('conditions' => array('Team.name' => 'Team 2')));
+		$expected = array(
+			array(
+				'User' => array('id' => 1, 'name' => 'User 1'),
+				'Task' => array(
+					array('id' => 1, 'name' => 'Task 1', 'user_id' => 1)
+				),
+				'Team' => array(
+					array('id' => 2, 'name' => 'Team 2')
+				)
+			),
+			array(
+				'User' => array('id' => 3, 'name' => 'User 3'),
+				'Task' => array(
+					array('id' => 4, 'name' => 'Task 4', 'user_id' => 3)
+				),
+				'Team' => array(
+					array('id' => 2, 'name' => 'Team 2')
+				)
+			)
+		);
+		$this->assertEqual($result, $expected);
+
+		// Find first
+		$result = $this->User->superFind('first', array('conditions' => array('Team.name' => 'Team 2')));
+		$this->assertEqual($result, $expected[0]);
+
+		// Filter in HABTM and master model
+		$result = $this->User->superFind('all', array('conditions' => array('Team.name' => 'Team 2', 'User.id' => 1)));
+		$expected = array(
+			array(
+				'User' => array('id' => 1, 'name' => 'User 1'),
+				'Task' => array(
+					array('id' => 1, 'name' => 'Task 1', 'user_id' => 1)
+				),
+				'Team' => array(
+					array('id' => 2, 'name' => 'Team 2')
+				)
+			)
+		);
+		$this->assertEqual($result, $expected);
+	}
+
+/**
+ * testConditionsOfHABTMAndHasMany
+ *
+ * @access public
+ * @return void
+ */
+	function testConditionsOfHABTMAndHasMany() {
+		$result = $this->User->superFind('all', array('conditions' => array('Team.name' => 'Team 1', 'Task.name' => 'Task 2')));
+		$expected = array(array(
+			'User' => array('id' => 2, 'name' => 'User 2'),
+			'Task' => array(
+				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2)
+			),
+			'Team' => array(
+				array('id' => 1, 'name' => 'Team 1')
+			)
+		));
+		$this->assertEqual($result, $expected);
+	}
 }
 
 ?>
