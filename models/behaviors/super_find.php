@@ -27,33 +27,52 @@ class SuperFindBehavior extends ModelBehavior {
 				'HABTM' => array()
 			);
 			foreach ($query['conditions'] as $key => $value) {
-				$check = $value;
+				$originalKey = $key;
+				$check =& $value;
 				if (is_string($key)) {
-					$check = $key;
+					$check =& $key;
 				}
-				if (!preg_match('/^(\w+)\.(\w+)/', $check, $matches)) {
+				if (!preg_match('/^\w+\.\w+(\.\w+)*/', $check, $matches)) {
 					continue;
 				}
-				list(, $modelName, $fieldName) = $matches;
-				if ($modelName === $Model->alias || isset($Model->belongsTo[$modelName]) || isset($Model->hasOne[$modelName])) {
+				$modelsName = explode('.', $matches[0]);
+				array_pop($matches); // Remove the field name
+				if ($modelsName[0] === $Model->alias) {
+					if (count($modelsName) > 1) {
+						$check = substr($check, strlen($modelsName[0]) + 1);
+						unset($modelsName[0]);
+					} else {
+						continue;
+					}
+				}
+				$mainModel = reset($modelsName);
+				if ($mainModel === $Model->alias || isset($Model->belongsTo[$mainModel]) || isset($Model->hasOne[$mainModel])) {
 					continue;
 				}
-				if (isset($Model->hasMany[$modelName], $Model->$modelName)) {
-					$extraFinds['hasMany'][$modelName][$key] = $value;
-					unset($query['conditions'][$key]);
-				} elseif (isset($Model->hasAndBelongsToMany[$modelName], $Model->$modelName)) {
-					$extraFinds['HABTM'][$modelName][$key] = $value;
-					unset($query['conditions'][$key]);
+				if (isset($Model->hasMany[$mainModel], $Model->$mainModel)) {
+					$extraFinds['hasMany'][$mainModel][$key] = $value;
+					unset($query['conditions'][$originalKey]);
+				} elseif (isset($Model->hasAndBelongsToMany[$mainModel], $Model->$mainModel)) {
+					$extraFinds['HABTM'][$mainModel][$key] = $value;
+					unset($query['conditions'][$originalKey]);
 				}
 			}
 			foreach ($extraFinds['hasMany'] as $modelName => $extraConditions) {
 				$fk = $Model->hasMany[$modelName]['foreignKey'];
 				$pk = $modelName . '.' . $Model->$modelName->primaryKey;
-				$data = $Model->$modelName->find('all', array(
+				$removeBehavior = false;
+				if (!$Model->$modelName->Behaviors->attached('SuperFind.SuperFind')) {
+					$removeBehavior = true;
+					$Model->$modelName->Behaviors->attach('SuperFind.SuperFind');
+				}
+				$data = $Model->$modelName->superFind('all', array(
 					'fields' => array($fk, $pk),
 					'conditions' => $extraConditions,
 					'recursive' => -1
 				));
+				if ($removeBehavior) {
+					$Model->$modelName->Behaviors->detach('SuperFind.SuperFind');
+				}
 				$masterModelIds = array_unique(Set::extract('{n}.' . $modelName . '.' . $fk, $data));
 				if (empty($masterModelIds)) {
 					$query['conditions'] = '1 = 0';
@@ -65,11 +84,18 @@ class SuperFindBehavior extends ModelBehavior {
 			}
 			foreach ($extraFinds['HABTM'] as $modelName => $extraConditions) {
 				$pk = $modelName . '.' . $Model->$modelName->primaryKey;
-				$data = $Model->$modelName->find('all', array(
+				if (!$Model->$modelName->Behaviors->attached('SuperFind.SuperFind')) {
+					$removeBehavior = true;
+					$Model->$modelName->Behaviors->attach('SuperFind.SuperFind');
+				}
+				$data = $Model->$modelName->superFind('all', array(
 					'fields' => array($pk),
 					'conditions' => $extraConditions,
 					'recursive' => -1
 				));
+				if ($removeBehavior) {
+					$Model->$modelName->Behaviors->detach('SuperFind.SuperFind');
+				}
 				if (empty($data)) {
 					$query['conditions'] = '1 = 0';
 					break;
@@ -81,7 +107,8 @@ class SuperFindBehavior extends ModelBehavior {
 					'ds' => $Model->useDbConfig,
 					'name' => 'Relation'
 				));
-				$data = $relationModel->find('all', array(
+				$relationModel->Behaviors->attach('SuperFind.SuperFind');
+				$data = $relationModel->superFind('all', array(
 					'fields' => array($Model->hasAndBelongsToMany[$modelName]['foreignKey']),
 					'conditions' => array($Model->hasAndBelongsToMany[$modelName]['associationForeignKey'] => $otherModelIds)
 				));
