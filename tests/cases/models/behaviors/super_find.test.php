@@ -221,6 +221,14 @@ class SuperFindBehaviorTest extends CakeTestCase {
 			)
 		);
 		$this->assertEqual($result, $expected);
+
+		// Record that exists (with string)
+		$result = $this->User->superFind('all', array('conditions' => 'Task.Record.title = "Record 1"'));
+		$this->assertEqual($result, $expected);
+
+		// Record that exists (with string in array)
+		$result = $this->User->superFind('all', array('conditions' => array('Task.Record.title = "Record 1"')));
+		$this->assertEqual($result, $expected);
 	}
 /**
  * testConditionsOfHABTMAndHasMany
