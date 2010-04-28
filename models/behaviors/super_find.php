@@ -31,10 +31,10 @@ class SuperFindBehavior extends ModelBehavior {
 				if (is_string($key)) {
 					$check = $key;
 				}
-				if (strpos($check, '.') === false) {
+				if (!preg_match('/^(\w+)\.(\w+)/', $check, $matches)) {
 					continue;
 				}
-				list($modelName, $fieldName) = explode('.', $check, 2);
+				list(, $modelName, $fieldName) = $matches;
 				if ($modelName === $Model->alias || isset($Model->belongsTo[$modelName]) || isset($Model->hasOne[$modelName])) {
 					continue;
 				}

@@ -213,6 +213,18 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		));
 		$this->assertEqual($result, $expected);
 	}
+
+/**
+ * testVarious
+ *
+ * @access public
+ * @return void
+ */
+	function testVarious() {
+		$result = $this->User->superFind('all', array('conditions' => array('name = "User.1"')));
+		$expected = array();
+		$this->assertIdentical($result, $expected);
+	}
 }
 
 ?>
