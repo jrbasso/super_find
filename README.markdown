@@ -7,6 +7,7 @@ Tested with CakePHP 1.3.0.
 ## Requirements
 
 - PHP 4.3.2 or higher
+- CakePHP
 
 ## Usage
 
