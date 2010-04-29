@@ -1,10 +1,32 @@
 <?php
-
+/**
+ * Super Find Behavior
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @link          http://github.com/jrbasso/super_find
+ * @package       super_find
+ * @subpackage    super_find.models.behaviors
+ * @since         SuperFind v0.1
+ * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ */
 class SuperFindBehavior extends ModelBehavior {
 
-	function setup(&$model, $config = array()) {
-	}
-
+/**
+ * Makes the find with the possibility of using conditions of all relationships
+ *
+ * @access public
+ * @param object $Model Pointer to model
+ * @param array $conditions SQL conditions array, or type of find operation (all / first / count /
+ *              neighbors / list / threaded)
+ * @param mixed $fields Either a single string of a field name, or an array of field names, or
+ *               options for matching
+ * @param string $order SQL ORDER BY conditions (e.g. "price DESC" or "name ASC")
+ * @param integer $recursive The number of levels deep to fetch associated records
+ * @return array Array of records
+ * @access public
+ */
 	function superFind(&$Model, $conditions = null, $fields = array(), $order = null, $recursive = null) {
 		if (!is_string($conditions)) {
 			$type = 'first';
@@ -105,6 +127,12 @@ class SuperFindBehavior extends ModelBehavior {
 		return $return;
 	}
 
+/**
+ * Add a conditions in model
+ *
+ * @access protected
+ * @return void
+ */
 	function _addCondition(&$Model, $type, $otherModel, $field, $value) {
 		$relation =& $Model->$type;
 		if (!empty($relation[$otherModel]['conditions'])) {

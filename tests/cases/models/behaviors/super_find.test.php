@@ -1,5 +1,21 @@
 <?php
+/**
+ * Super Find Behavior Tests
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @link          http://github.com/jrbasso/super_find
+ * @package       super_find
+ * @subpackage    super_find.tests.cases.models.behaviors
+ * @since         SuperFind v0.1
+ * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ */
 
+/**
+ * User Model for Test
+ *
+ */
 class User extends CakeTestModel {
 	var $name = 'User';
 	var $actsAs = array('SuperFind.SuperFind');
@@ -7,6 +23,10 @@ class User extends CakeTestModel {
 	var $hasAndBelongsToMany = array('Team');
 }
 
+/**
+ * Task Model for Test
+ *
+ */
 class Task extends CakeTestModel {
 	var $name = 'Task';
 	var $actsAs = array('SuperFind.SuperFind');
@@ -14,25 +34,49 @@ class Task extends CakeTestModel {
 	var $hasMany = array('Record');
 }
 
+/**
+ * Record Model for Test
+ *
+ */
 class Record extends CakeTestModel {
 	var $name = 'Record';
 	var $actsAs = array('SuperFind.SuperFind');
 	var $belongsTo = array('Task');
 }
 
+/**
+ * Team Model for Test
+ *
+ */
 class Team extends CakeTestModel {
 	var $name = 'Team';
 	var $actsAs = array('SuperFind.SuperFind');
 	var $hasAndBelongsToMany = array('User');
 }
 
+/**
+ * SuperFindBehavior tests
+ *
+ */
 class SuperFindBehaviorTest extends CakeTestCase {
 
+/**
+ * Fixtures
+ *
+ * @var array
+ * @access public
+ */
 	var $fixtures = array(
 		'plugin.super_find.user', 'plugin.super_find.task', 'plugin.super_find.team', 'plugin.super_find.teams_user',
 		'plugin.super_find.record'
 	);
 
+/**
+ * startTest
+ *
+ * @access public
+ * @return void
+ */
 	function startTest() {
 		$this->User =& ClassRegistry::init('User');
 		$this->Record =& ClassRegistry::init('Record');
