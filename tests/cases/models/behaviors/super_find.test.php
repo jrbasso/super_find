@@ -239,6 +239,52 @@ class SuperFindBehaviorTest extends CakeTestCase {
 	}
 
 /**
+ * testConditionsInHasManyOfMultipleLevels
+ *
+ * @access public
+ * @return void
+ */
+	function testConditionsInHasManyOfMultipleLevels() {
+		// Invalid record
+		$result = $this->User->superFind('all', array('conditions' => array('Task.Record.title' => 'Record 999')));
+		$expected = array();
+		$this->assertIdentical($result, $expected);
+
+		// Record that exists
+		$result = $this->User->superFind('all', array('conditions' => array('Task.Record.title' => 'Record 1')));
+		$expected = array(
+			array(
+				'User' => array('id' => 1, 'name' => 'User 1'),
+				'Task' => array(
+					array('id' => 1, 'name' => 'Task 1', 'user_id' => 1)
+				),
+				'Team' => array(
+					array('id' => 2, 'name' => 'Team 2'),
+					array('id' => 4, 'name' => 'Team 4'),
+				)
+			)
+		);
+		$this->assertEqual($result, $expected);
+
+		// Record that exists (with string)
+		$result = $this->User->superFind('all', array('conditions' => 'Task.Record.title = "Record 1"'));
+		$this->assertEqual($result, $expected);
+
+		// Record that exists (with string in array)
+		$result = $this->User->superFind('all', array('conditions' => array('Task.Record.title = "Record 1"')));
+		$this->assertEqual($result, $expected);
+
+		// Record that exists with Task too
+		$result = $this->User->superFind('all', array('conditions' => array('Task.Record.title' => 'Record 1', 'Task.name' => 'Task 1')));
+		$this->assertEqual($result, $expected);
+
+		// Record that exists but Task no
+		$result = $this->User->superFind('all', array('conditions' => array('Task.Record.title' => 'Record 1', 'Task.name' => 'Task 999')));
+		$expected = array();
+		$this->assertIdentical($result, $expected);
+	}
+
+/**
  * testConditionsOfHABTMAndHasMany
  *
  * @access public

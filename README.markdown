@@ -75,7 +75,6 @@ Note that SuperFind does not show 'User 2' and 'User 3' because they are not ass
 
 ## Known Limitations
 
-- So far the plugin supports the search for just one level (i.e. you can't use `Task.Record.field` in conditions)
 - Not tested with others behaviors (like Containable).
 - No work with 'NOT', 'OR' and others in conditions.
 
