@@ -229,7 +229,17 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		// Record that exists (with string in array)
 		$result = $this->User->superFind('all', array('conditions' => array('Task.Record.title = "Record 1"')));
 		$this->assertEqual($result, $expected);
+
+		// Record that exists with Task too
+		$result = $this->User->superFind('all', array('conditions' => array('Task.Record.title' => 'Record 1', 'Task.name' => 'Task 1')));
+		$this->assertEqual($result, $expected);
+
+		// Record that exists but Task no
+		$result = $this->User->superFind('all', array('conditions' => array('Task.Record.title' => 'Record 1', 'Task.name' => 'Task 999')));
+		$expected = array();
+		$this->assertIdentical($result, $expected);
 	}
+
 /**
  * testConditionsOfHABTMAndHasMany
  *
