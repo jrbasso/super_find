@@ -69,6 +69,12 @@ class SuperFindBehavior extends ModelBehavior {
 				}
 				$mainModel = reset($modelsName);
 				if ($mainModel === $Model->alias || isset($Model->belongsTo[$mainModel]) || isset($Model->hasOne[$mainModel])) {
+					unset($query['conditions'][$originalKey]);
+					if ($check === $key) {
+						$query['conditions'][$check] = $value;
+					} else {
+						$query['conditions'][] = $check;
+					}
 					continue;
 				}
 				if (isset($Model->hasMany[$mainModel], $Model->$mainModel)) {
@@ -90,7 +96,7 @@ class SuperFindBehavior extends ModelBehavior {
 				$data = $Model->$modelName->superFind('all', array(
 					'fields' => array($fk, $pk),
 					'conditions' => $extraConditions,
-					'recursive' => -1
+					'recursive' => 0
 				));
 				if ($removeBehavior) {
 					$Model->$modelName->Behaviors->detach('SuperFind.SuperFind');
@@ -118,7 +124,7 @@ class SuperFindBehavior extends ModelBehavior {
 				$data = $Model->$modelName->superFind('all', array(
 					'fields' => array($pk),
 					'conditions' => $extraConditions,
-					'recursive' => -1
+					'recursive' => 0
 				));
 				if ($removeBehavior) {
 					$Model->$modelName->Behaviors->detach('SuperFind.SuperFind');

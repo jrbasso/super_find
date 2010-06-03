@@ -30,8 +30,18 @@ class User extends CakeTestModel {
 class Task extends CakeTestModel {
 	var $name = 'Task';
 	var $actsAs = array('SuperFind.SuperFind');
-	var $belongsTo = array('User');
+	var $belongsTo = array('Category', 'User');
 	var $hasMany = array('Record');
+}
+
+/**
+ * Category Model for Test
+ *
+ */
+class Category extends CakeTestModel {
+	var $name = 'Category';
+	var $actsAs = array('SuperFind.SuperFind');
+	var $hasMany = array('Task');
 }
 
 /**
@@ -68,7 +78,7 @@ class SuperFindBehaviorTest extends CakeTestCase {
  */
 	var $fixtures = array(
 		'plugin.super_find.user', 'plugin.super_find.task', 'plugin.super_find.team', 'plugin.super_find.teams_user',
-		'plugin.super_find.record'
+		'plugin.super_find.record', 'plugin.super_find.category'
 	);
 
 /**
@@ -100,7 +110,7 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 
 		$result = $this->Record->superFind('all', array('fields' => array('Record.title', 'Task.*'), 'recursive' => 0, 'limit' => 1));
-		$expected = array(array('Record' => array('title' => 'Record 1'), 'Task' => array('id' => 1, 'name' => 'Task 1', 'user_id' => 1)));
+		$expected = array(array('Record' => array('title' => 'Record 1'), 'Task' => array('id' => 1, 'name' => 'Task 1', 'user_id' => 1, 'category_id' => 1)));
 		$this->assertEqual($result, $expected);
 	}
 
@@ -129,8 +139,8 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		$expected = array(array(
 			'User' => array('id' => 2, 'name' => 'User 2'),
 			'Task' => array(
-				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2),
-				array('id' => 3, 'name' => 'Task 3', 'user_id' => 2)
+				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2, 'category_id' => 1),
+				array('id' => 3, 'name' => 'Task 3', 'user_id' => 2, 'category_id' => 1)
 			),
 			'Team' => array(
 				array('id' => 1, 'name' => 'Team 1')
@@ -147,7 +157,7 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		$expected = array(array(
 			'User' => array('id' => 2, 'name' => 'User 2'),
 			'Task' => array(
-				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2)
+				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2, 'category_id' => 1)
 			),
 			'Team' => array(
 				array('id' => 1, 'name' => 'Team 1')
@@ -185,8 +195,8 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		$expected = array(array(
 			'User' => array('id' => 2, 'name' => 'User 2'),
 			'Task' => array(
-				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2),
-				array('id' => 3, 'name' => 'Task 3', 'user_id' => 2)
+				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2, 'category_id' => 1),
+				array('id' => 3, 'name' => 'Task 3', 'user_id' => 2, 'category_id' => 1)
 			),
 			'Team' => array(
 				array('id' => 1, 'name' => 'Team 1')
@@ -200,7 +210,7 @@ class SuperFindBehaviorTest extends CakeTestCase {
 			array(
 				'User' => array('id' => 1, 'name' => 'User 1'),
 				'Task' => array(
-					array('id' => 1, 'name' => 'Task 1', 'user_id' => 1)
+					array('id' => 1, 'name' => 'Task 1', 'user_id' => 1, 'category_id' => 1)
 				),
 				'Team' => array(
 					array('id' => 2, 'name' => 'Team 2')
@@ -209,7 +219,7 @@ class SuperFindBehaviorTest extends CakeTestCase {
 			array(
 				'User' => array('id' => 3, 'name' => 'User 3'),
 				'Task' => array(
-					array('id' => 4, 'name' => 'Task 4', 'user_id' => 3)
+					array('id' => 4, 'name' => 'Task 4', 'user_id' => 3, 'category_id' => 2)
 				),
 				'Team' => array(
 					array('id' => 2, 'name' => 'Team 2')
@@ -228,7 +238,7 @@ class SuperFindBehaviorTest extends CakeTestCase {
 			array(
 				'User' => array('id' => 1, 'name' => 'User 1'),
 				'Task' => array(
-					array('id' => 1, 'name' => 'Task 1', 'user_id' => 1)
+					array('id' => 1, 'name' => 'Task 1', 'user_id' => 1, 'category_id' => 1)
 				),
 				'Team' => array(
 					array('id' => 2, 'name' => 'Team 2')
@@ -256,7 +266,7 @@ class SuperFindBehaviorTest extends CakeTestCase {
 			array(
 				'User' => array('id' => 1, 'name' => 'User 1'),
 				'Task' => array(
-					array('id' => 1, 'name' => 'Task 1', 'user_id' => 1)
+					array('id' => 1, 'name' => 'Task 1', 'user_id' => 1, 'category_id' => 1)
 				),
 				'Team' => array(
 					array('id' => 2, 'name' => 'Team 2'),
@@ -295,12 +305,34 @@ class SuperFindBehaviorTest extends CakeTestCase {
 		$expected = array(array(
 			'User' => array('id' => 2, 'name' => 'User 2'),
 			'Task' => array(
-				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2)
+				array('id' => 2, 'name' => 'Task 2', 'user_id' => 2, 'category_id' => 1)
 			),
 			'Team' => array(
 				array('id' => 1, 'name' => 'Team 1')
 			)
 		));
+		$this->assertEqual($result, $expected);
+	}
+
+/**
+ * testConditionsWithBelongsTo
+ *
+ * @access public
+ * @return void
+ */
+	function testConditionsWithBelongsTo() {
+		$result = $this->User->superFind('all', array('conditions' => array('Task.Category.name' => 'Category 2')));
+		$expected = array(
+			array(
+				'User' => array('id' => '3', 'name' => 'User 3'),
+				'Task' => array(
+					array('id' => '4', 'name' => 'Task 4', 'user_id' => '3', 'category_id' => '2')
+				),
+				'Team' => array(
+					array('id' => '2', 'name' => 'Team 2')
+				)
+			)
+		);
 		$this->assertEqual($result, $expected);
 	}
 
