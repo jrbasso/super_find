@@ -100,7 +100,12 @@ class SuperFindBehavior extends ModelBehavior {
 					$query['conditions'] = '1 = 0';
 					break;
 				}
-				$query['conditions'][$Model->primaryKey] = $masterModelIds;
+				$selfPk = $Model->alias . '.' . $Model->primaryKey;
+				if (isset($query['conditions'][$selfPk])) {
+					$query['conditions'][$selfPk] = array_intersect((array)$query['conditions'][$selfPk], $masterModelIds);
+				} else {
+					$query['conditions'][$selfPk] = $masterModelIds;
+				}
 				$otherModelIds = array_unique(Set::extract('{n}.' . $pk, $data));
 				$this->_addCondition($Model, 'hasMany', $modelName, $pk, $otherModelIds);
 			}
@@ -141,7 +146,12 @@ class SuperFindBehavior extends ModelBehavior {
 				}
 				$masterModelIds = array_unique(Set::extract('{n}.Relation.' . $Model->hasAndBelongsToMany[$modelName]['foreignKey'], $data));
 
-				$query['conditions'][$Model->primaryKey] = $masterModelIds;
+				$selfPk = $Model->alias . '.' . $Model->primaryKey;
+				if (isset($query['conditions'][$selfPk])) {
+					$query['conditions'][$selfPk] = array_intersect((array)$query['conditions'][$selfPk], $masterModelIds);
+				} else {
+					$query['conditions'][$selfPk] = $masterModelIds;
+				}
 				$this->_addCondition($Model, 'hasAndBelongsToMany', $modelName, $pk, $otherModelIds);
 			}
 		}
