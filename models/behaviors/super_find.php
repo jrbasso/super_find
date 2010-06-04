@@ -75,6 +75,9 @@ class SuperFindBehavior extends ModelBehavior {
 					if ($mainModel !== $Model->alias) {
 						if ($Model->Behaviors->attached('Containable')) {
 							$query['contain'][] = $mainModel;
+							if (isset($query['recursive'])) {
+								unset($query['recursive']);
+							}
 						} else {
 							if (isset($query['recursive'])) {
 								if ($query['recursive'] < 0) {
