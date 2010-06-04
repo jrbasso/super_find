@@ -72,6 +72,19 @@ class SuperFindBehavior extends ModelBehavior {
 					} else {
 						$query['conditions'][] = $check;
 					}
+					if ($mainModel !== $Model->alias) {
+						if ($Model->Behaviors->attached('Containable')) {
+							$query['contain'][] = $mainModel;
+						} else {
+							if (isset($query['recursive'])) {
+								if ($query['recursive'] < 0) {
+									$query['recursive'] = 0;
+								} else {
+									$query['recursive'] = 0;
+								}
+							}
+						}
+					}
 					continue;
 				}
 				if (isset($Model->hasMany[$mainModel], $Model->$mainModel)) {
@@ -121,7 +134,7 @@ class SuperFindBehavior extends ModelBehavior {
 			$data = $Model->$modelName->superFind('all', array(
 				'fields' => array($pk),
 				'conditions' => $extraConditions,
-				'recursive' => 0
+				'recursive' => -1
 			));
 			if ($removeBehavior) {
 				$Model->$modelName->Behaviors->detach('SuperFind.SuperFind');
@@ -161,7 +174,7 @@ class SuperFindBehavior extends ModelBehavior {
 			$data = $Model->$modelName->superFind('all', array(
 				'fields' => array($fk, $pk),
 				'conditions' => $extraConditions,
-				'recursive' => 0
+				'recursive' => -1
 			));
 			if ($removeBehavior) {
 				$Model->$modelName->Behaviors->detach('SuperFind.SuperFind');
@@ -199,7 +212,7 @@ class SuperFindBehavior extends ModelBehavior {
 			$data = $Model->$modelName->superFind('all', array(
 				'fields' => array($pk),
 				'conditions' => $extraConditions,
-				'recursive' => 0
+				'recursive' => -1
 			));
 			if ($removeBehavior) {
 				$Model->$modelName->Behaviors->detach('SuperFind.SuperFind');
