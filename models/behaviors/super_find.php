@@ -65,7 +65,7 @@ class SuperFindBehavior extends ModelBehavior {
 					}
 				}
 				$mainModel = reset($modelsName);
-				if ($mainModel === $Model->alias || isset($Model->belongsTo[$mainModel]) || isset($Model->hasOne[$mainModel])) {
+				if (count($modelsName) < 3 && ($mainModel === $Model->alias || isset($Model->belongsTo[$mainModel]) || isset($Model->hasOne[$mainModel]))) {
 					unset($query['conditions'][$originalKey]);
 					if ($check === $key) {
 						$query['conditions'][$check] = $value;
@@ -80,8 +80,18 @@ class SuperFindBehavior extends ModelBehavior {
 				} elseif (isset($Model->hasAndBelongsToMany[$mainModel], $Model->$mainModel)) {
 					$extraFinds['hasAndBelongsToMany'][$mainModel][$key] = $value;
 					unset($query['conditions'][$originalKey]);
+				} else {
+					if (count($modelsName) > 2) {
+						if (isset($Model->belongsTo[$mainModel], $Model->$mainModel)) {
+							$extraFinds['belongsTo'][$mainModel][$key] = $value;
+						} elseif (isset($Model->hasOne[$mainModel], $Model->$mainModel)) {
+							$extraFinds['hasOne'][$mainModel][$key] = $value;
+						}
+						unset($query['conditions'][$originalKey]);
+					}
 				}
 			}
+			$this->_subFindBelongsTo($extraFinds['belongsTo'], $Model, $query);
 			$this->_subFindHasMany($extraFinds['hasMany'], $Model, $query);
 			$this->_subFindHasAndBelongsToMany($extraFinds['hasAndBelongsToMany'], $Model, $query);
 		}
@@ -92,6 +102,45 @@ class SuperFindBehavior extends ModelBehavior {
 		}
 
 		return $return;
+	}
+
+/**
+ * Make sub finds to belongsTo assoc
+ *
+ * @access protected
+ * @return void
+ */
+	function _subFindBelongsTo($data, &$Model, &$query) {
+		foreach ($data as $modelName => $extraConditions) {
+			$pk = $modelName . '.' . $Model->$modelName->primaryKey;
+			$removeBehavior = false;
+			if (!$Model->$modelName->Behaviors->attached('SuperFind')) {
+				$removeBehavior = true;
+				$Model->$modelName->Behaviors->attach('SuperFind.SuperFind');
+			}
+			$data = $Model->$modelName->superFind('all', array(
+				'fields' => array($pk),
+				'conditions' => $extraConditions,
+				'recursive' => 0
+			));
+			if ($removeBehavior) {
+				$Model->$modelName->Behaviors->detach('SuperFind.SuperFind');
+			}
+			if (empty($data)) {
+				$query['conditions'] = '1 = 0';
+				break;
+			}
+			$masterModelIds = array_unique(Set::extract('{n}.' . $pk, $data));
+
+			$fk = $Model->belongsTo[$modelName]['foreignKey'];
+			if (isset($query['conditions'][$fk])) {
+				$query['conditions'][$fk] = array_intersect((array)$query['conditions'][$fk], $masterModelIds);
+			} else {
+				$query['conditions'][$fk] = $masterModelIds;
+			}
+			$otherModelIds = array_unique(Set::extract('{n}.' . $pk, $data));
+			$this->_addCondition($Model, 'belongsTo', $modelName, $pk, $otherModelIds);
+		}
 	}
 
 /**
