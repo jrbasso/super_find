@@ -89,7 +89,7 @@ class SuperFindBehavior extends ModelBehavior {
 				$fk = $Model->hasMany[$modelName]['foreignKey'];
 				$pk = $modelName . '.' . $Model->$modelName->primaryKey;
 				$removeBehavior = false;
-				if (!$Model->$modelName->Behaviors->attached('SuperFind.SuperFind')) {
+				if (!$Model->$modelName->Behaviors->attached('SuperFind')) {
 					$removeBehavior = true;
 					$Model->$modelName->Behaviors->attach('SuperFind.SuperFind');
 				}
