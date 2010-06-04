@@ -142,7 +142,8 @@ class SuperFindBehavior extends ModelBehavior {
 	function _subFindHasAndBelongsToMany($data, &$Model, &$query) {
 		foreach ($data as $modelName => $extraConditions) {
 			$pk = $modelName . '.' . $Model->$modelName->primaryKey;
-			if (!$Model->$modelName->Behaviors->attached('SuperFind.SuperFind')) {
+			$removeBehavior = false;
+			if (!$Model->$modelName->Behaviors->attached('SuperFind')) {
 				$removeBehavior = true;
 				$Model->$modelName->Behaviors->attach('SuperFind.SuperFind');
 			}
